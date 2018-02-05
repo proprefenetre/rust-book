@@ -4,49 +4,86 @@
 
 use std::collections::HashMap;
 use std::iter::FromIterator;
-use std::io::{stdin,stdout,Write};
 
-
-// calculate mean
-fn mean(data: &Vec<i32>) -> f32 {
-    let total: i32 = data.iter().sum();
-    total as f32/ data.len() as f32
+#[derive(Debug)]
+struct CentralTendency {
+    mean: f32,
+    median: f32,
+    mode: Vec<i32>,
 }
 
-// median middle value of a sorted vector, or the mean of the two center values if the length of the vector is an even number
-fn median(data: &mut Vec<i32>) -> i32 {
-    data.sort();
-    let mid = data.len() / 2;
-    if data.len() % 2 == 0 {
-        // mean of two center values
-        (data[mid-1] + data[mid]) / 2
-    } else {
-        data[mid]
+impl CentralTendency {
+    fn new() -> CentralTendency {
+        CentralTendency { mean: 0f32, median: 0f32, mode: vec![0],}
+    }
+
+    fn calculate(&mut self, data: Vec<i32>) {
+        self.mean = self.calc_mean(&data);
+        self.mode = self.calc_mode(&data);
+        self.median = self.calc_median(data);
+    }
+
+    // calculate mean
+    fn calc_mean(&self, data: &[i32]) -> f32 {
+        data.iter().fold(0i32, |s, &n| s + n as i32) as f32 / data.len() as f32
+    }
+
+    // median middle value of a sorted vector, or the mean of the two center 
+    // values if the length of the vector is an even number
+    fn calc_median(&self, mut data: Vec<i32>) -> f32 {
+        data.sort();
+        let mid = data.len() / 2;
+        if data.len() % 2 == 0 {
+            (data[mid-1] as f32 + data[mid] as f32) / 2 as f32
+        } else {
+            data[mid] as f32
+        }
+    }
+    
+    // mode: the number(s) that occurs most frequently
+    fn calc_mode(&self, data: &[i32]) -> Vec<i32> {
+        let mut map: HashMap<i32, i32> = HashMap::new();
+        for n in data {
+            *map.entry(*n).or_insert(0) += 1;
+        }
+
+        let max = map.values()
+                     .max()
+                     .unwrap()
+                     .clone();
+
+        map.into_iter()
+            .filter(|v| v.1 == max)
+            .map(|v| v.0)
+            .collect::<Vec<i32>>()
+        
     }
 }
 
-// mode: the most frequent number
-fn mode(data: &Vec<i32>) -> i32 {
-    let mut map: HashMap<i32, i32> = HashMap::new();
-    for n in data {
-        *map.entry(*n).or_insert(0) += 1;
-    }
-    let mut count_v: Vec<_> = map.iter().collect();
-    count_v.sort_by(|a, b| a.1.cmp(b.1).reverse());
-    *count_v[0].0
-}
 
 // convert a string to pig latin
 fn to_latin(s: &str) -> String {
     // let bs = s.as_bytes();
-    let c = s.chars().next();
+    let c = s.chars()
+             .next();
     match c.unwrap() {
         'a' | 'e' | 'i' | 'o' | 'u' => { return format!("{}{}", s, "hay"); }
         _ => { return format!("{}{}{}", &s[1..], c.unwrap(), "ay"); }
     }
 }
 
+// retrieve the first word of a string (slice)
+fn first_word(s: &str) -> &str {    // Now you can pass literals as well as strings
+    let happen = s.as_bytes();
+    for (i, &item) in happen.iter().enumerate() {
+        if item == b' ' {
+            return &s[..i];
+        }
+    }
+    &s  // slice containing the entire string
+}
 
+// retrieve the second word of a string (slice)
 fn second_word(s: &str) -> &str {
     let bs = s.as_bytes();
     let mut start = 0;
@@ -62,19 +99,9 @@ fn second_word(s: &str) -> &str {
     &s
 }
 
-fn first_word(s: &str) -> &str {    // Now you can pass literals as well as strings
-    let happen = s.as_bytes();
-    for (i, &item) in happen.iter().enumerate() {
-        if item == b' ' {
-            return &s[..i];
-        }
-    }
-    &s  // slice containing the entire string
-}
-
+#[derive(Debug)]
 struct Database {
     people: HashMap<String, String>,
-    // depts: HashMap<_, _>,
 }
 
 impl Database {
@@ -113,6 +140,7 @@ impl Database {
         for p in v {
             println!("{:10}", p.0);
         } 
+        println!("\n");
     }
 
     fn print_all(&self) {
@@ -122,6 +150,7 @@ impl Database {
         for p in v {
             println!("{:10} {:<}", p.0, p.1);
         } 
+        println!("\n");
     }
 }
 
@@ -133,32 +162,48 @@ fn main() {
     d.command("Add Jan to Baarden");
     d.command("Add Piet to Baarden");
     d.command("Add Joris to Baarden");
-    let s = "Print All".to_string();
+
+    let s1 = "Print All".to_string();
     let s2 = "Print Dept Engineering".to_string();
-    d.command(&s);
+    let s3 = "Print Dept Baarden";
+
+    d.command(&s1);
     d.command(&s2);
-    d.command("add x to y");
+    d.command(s3);
 
-//     let v1 = vec![3, -7, 5, 13, -2];
-//     println!("{}", mean(&v1)); // 2.4
+    let mut ct = CentralTendency::new();
+    let v1 = vec![3, -7, 5, 13, -2];
+    ct.calculate(v1);
+    println!("{:?}", ct);
 
-//     let mut v2 = vec![3, 13, 7, 5, 21, 23, 23, 40, 23, 14, 12, 56, 23, 29];
-//     println!("{}", median(&mut v2)); // 22
+    // assert_eq!(mean(&v1), 2.4);
 
-//     let mut v3 = vec![3, 13, 7, 5, 21, 23, 39, 23, 40, 23, 14, 12, 56, 23, 29];
-//     println!("{}", median(&mut v3)); // 23
+    let v2 = vec![3, 13, 7, 5, 21, 23, 23, 40, 23, 14, 12, 56, 23, 29];
+    ct.calculate(v2);
+    println!("{:?}", ct);
+    // assert_eq!(median(&mut v2), 22);
+
+    let v3 = vec![3, 13, 7, 5, 21, 23, 39, 23, 40, 23, 14, 12, 56, 23, 29];
+    ct.calculate(v3);
+    println!("{:?}", ct);
+    // assert_eq!(median(&mut v3), 23);
     
-//     let v4 = vec![19, 8, 29, 35, 19, 28, 15];
-//     println!("{}", mode(&v4)); // 19
+    let v4 = vec![19, 8, 29, 35, 19, 28, 15];
+    ct.calculate(v4);
+    println!("{:?}", ct);
     
-//     let s1 = "first".to_string();
-//     println!("{}", to_latin(&s1)); // irst-fay
 
-//     let s2 = "apple".to_string();
-//     println!("{}", to_latin(&s2)); // apple-hay
+    ct.calculate(vec![3, 5, 8]);
+    println!("{:?}", ct);
 
-//     println!("{}", to_latin("latin"));
-//     println!("{}", to_latin("banana"));
-//     println!("{}", to_latin("trash"));
-//     println!("{}", to_latin("happy"));
+
+    let s1 = "first".to_string();
+    assert_eq!(to_latin(&s1), "irstfay");
+
+    let s2 = "apple".to_string();
+    assert_eq!(to_latin(&s2), "applehay");
+
+    assert_eq!(to_latin("latin"), "atinlay");
+    assert_eq!(to_latin("banana"), "ananabay");
+
 }
