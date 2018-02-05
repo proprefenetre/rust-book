@@ -8,8 +8,8 @@
 pub fn to_latin(s: &str) -> String {
     let c = s.chars().next();       // get the first character
     match c.unwrap() {
-        'a' | 'e' | 'i' | 'o' | 'u' => { return format!("{}{}", s, "-hay"); }
-        _ => { return format!("{}-{}{}", &s[1..], c.unwrap(), "ay"); }
+        'a' | 'e' | 'i' | 'o' | 'u' => format!("{}{}", s, "-hay"),
+        _ => format!("{}-{}{}", &s[1..], c.unwrap(), "ay"),
     }
 }
 
