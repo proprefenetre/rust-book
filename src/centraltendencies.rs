@@ -1,10 +1,14 @@
+// Given a list of integers, use a vector and return the mean (average), median
+// (when sorted, the value in the middle position), and mode (the value that occurs
+// most often (https://doc.rust-lang.org/book/second-edition/ch08-03-hash-maps.html).
+
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct CentralTendencies {
-    mean: f32,
-    median: f32,
-    mode: Vec<i32>,
+    pub mean: f32,
+    pub median: f32,
+    pub mode: Vec<i32>,
 }
 
 impl CentralTendencies {
