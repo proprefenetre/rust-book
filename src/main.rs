@@ -4,61 +4,8 @@
 
 use std::collections::HashMap;
 
-#[derive(Debug)]
-struct CentralTendency {
-    mean: f32,
-    median: f32,
-    mode: Vec<i32>,
-}
-
-impl CentralTendency {
-    fn new() -> CentralTendency {
-        CentralTendency { mean: 0f32, median: 0f32, mode: vec![0],}
-    }
-
-    fn calculate(&mut self, data: Vec<i32>) {
-        self.mean = self.calc_mean(&data);
-        self.mode = self.calc_mode(&data);
-        self.median = self.calc_median(data);
-    }
-
-    // calculate mean
-    fn calc_mean(&self, data: &[i32]) -> f32 {
-        data.iter().fold(0i32, |s, &n| s + n as i32) as f32 / data.len() as f32
-    }
-
-    // median middle value of a sorted vector, or the mean of the two center 
-    // values if the length of the vector is an even number
-    fn calc_median(&self, mut data: Vec<i32>) -> f32 {
-        data.sort();
-        let mid = data.len() / 2;
-        if data.len() % 2 == 0 {
-            (data[mid-1] as f32 + data[mid] as f32) / 2 as f32
-        } else {
-            data[mid] as f32
-        }
-    }
-    
-    // mode: the number(s) that occurs most frequently
-    fn calc_mode(&self, data: &[i32]) -> Vec<i32> {
-        let mut map: HashMap<i32, i32> = HashMap::new();
-        for n in data {
-            *map.entry(*n).or_insert(0) += 1;
-        }
-
-        let max = map.values()
-                     .max()
-                     .unwrap()
-                     .clone();
-
-        map.into_iter()
-            .filter(|v| v.1 == max)
-            .map(|v| v.0)
-            .collect::<Vec<i32>>()
-        
-    }
-}
-
+mod centraltendencies;
+mod database;
 
 // convert a string to pig latin
 fn to_latin(s: &str) -> String {
@@ -96,61 +43,6 @@ fn second_word(s: &str) -> &str {
         }
     }
     &s
-}
-
-#[derive(Debug)]
-struct Database {
-    people: HashMap<String, String>,
-}
-
-impl Database {
-
-    fn new() -> Database {
-        Database { people: HashMap::new() }
-    }
-
-    fn command(&mut self, s: &str) {
-        let words: Vec<&str> = s.split_whitespace().collect();
-        match words[0] {
-            "Add" => { 
-                self.add(words[1].to_owned(), words[3].to_owned());
-            },
-            "Print" => {
-                match words[1] {
-                    "Dept" => self.print_dept(words[2].to_owned()),
-                    "All" => self.print_all(),
-                    &_ => println!("Not a valid category: {:?}", words[1].to_owned()),
-                }
-            },
-            &_ => println!("Not a valid command: {:?}", words[0]),
-        }
-    }
-
-    fn add(&mut self, name: String, dept: String) {
-        self.people.insert(name, dept);
-    }
-
-    fn print_dept(&self, dept: String) { 
-        // retrieve a list of all people in a department, sorted alphabetically.
-        let mut v: Vec<_> = self.people.iter().collect();
-        v.retain(|x| *x.1 == dept);
-        v.sort_by(|a, b| a.0.cmp(b.0));
-        println!("\nEmployees in Department '{}':", dept);
-        for p in v {
-            println!("{:10}", p.0);
-        } 
-        println!("\n");
-    }
-
-    fn print_all(&self) {
-        let mut v: Vec<_> = self.people.iter().collect();
-        v.sort_by(|a, b| a.0.cmp(b.0));
-        println!("\nEmployees:");
-        for p in v {
-            println!("{:10} {:<}", p.0, p.1);
-        } 
-        println!("\n");
-    }
 }
 
 fn main() {
