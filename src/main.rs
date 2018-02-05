@@ -3,7 +3,6 @@
 #![allow(unused_variables)]
 
 use std::collections::HashMap;
-use std::iter::FromIterator;
 
 #[derive(Debug)]
 struct CentralTendency {
@@ -111,7 +110,7 @@ impl Database {
     }
 
     fn command(&mut self, s: &str) {
-        let words: Vec<&str> = Vec::from_iter(s.split_whitespace());
+        let words: Vec<&str> = s.split_whitespace().collect();
         match words[0] {
             "Add" => { 
                 self.add(words[1].to_owned(), words[3].to_owned());
@@ -133,7 +132,7 @@ impl Database {
 
     fn print_dept(&self, dept: String) { 
         // retrieve a list of all people in a department, sorted alphabetically.
-        let mut v = Vec::from_iter(self.people.iter());
+        let mut v: Vec<_> = self.people.iter().collect();
         v.retain(|x| *x.1 == dept);
         v.sort_by(|a, b| a.0.cmp(b.0));
         println!("\nEmployees in Department '{}':", dept);
@@ -144,7 +143,7 @@ impl Database {
     }
 
     fn print_all(&self) {
-        let mut v = Vec::from_iter(self.people.iter());
+        let mut v: Vec<_> = self.people.iter().collect();
         v.sort_by(|a, b| a.0.cmp(b.0));
         println!("\nEmployees:");
         for p in v {
