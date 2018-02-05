@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
 #[derive(Debug)]
-struct CentralTendencies {
+pub struct CentralTendencies {
     mean: f32,
     median: f32,
     mode: Vec<i32>,
 }
 
 impl CentralTendencies {
-    fn new() -> CentralTendencies {
+    pub fn new() -> CentralTendencies {
         CentralTendencies { mean: 0f32, median: 0f32, mode: vec![0],}
     }
 
-    fn calculate(&mut self, data: Vec<i32>) {
+    pub fn calculate(&mut self, data: Vec<i32>) {
         self.mean = self.calc_mean(&data);
         self.mode = self.calc_mode(&data);
         self.median = self.calc_median(data);

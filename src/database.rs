@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 
 #[derive(Debug)]
-struct Database {
+pub struct Database {
     people: HashMap<String, String>,
 }
 
 impl Database {
 
-    fn new() -> Database {
+    pub fn new() -> Database {
         Database { people: HashMap::new() }
     }
 
-    fn command(&mut self, s: &str) {
+    pub fn command(&mut self, s: &str) {
         let words: Vec<&str> = s.split_whitespace().collect();
         match words[0] {
             "Add" => { 
